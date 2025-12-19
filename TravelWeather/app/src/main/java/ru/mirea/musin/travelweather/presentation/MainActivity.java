@@ -36,27 +36,29 @@ public class MainActivity extends AppCompatActivity {
         ImageButton btnMic = findViewById(R.id.btnMic);
         recyclerView = findViewById(R.id.recyclerView);
 
-        // --- ИНИЦИАЛИЗАЦИЯ RECYCLER VIEW ---
+        // --- НАСТРОЙКА СПИСКА ---
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         cityAdapter = new CityAdapter(
-                city -> openWeather(city.getName()), // Клик по городу
-                city -> viewModel.removeCity(city)   // Клик по удалению
+                city -> openWeather(city.getName()),
+                city -> viewModel.removeCity(city)
         );
         recyclerView.setAdapter(cityAdapter);
 
         // --- VIEW MODEL ---
         viewModel = new ViewModelProvider(this, new ViewModelFactory(this)).get(MainViewModel.class);
 
-        // Подписываемся на LiveData и обновляем Адаптер
-        viewModel.getFavorites().observe(this, favoritesList -> {
-            cityAdapter.setItems(favoritesList);
+        // Подписка на общий контент (Сохраненные + Популярные)
+        viewModel.getContent().observe(this, list -> {
+            cityAdapter.setItems(list);
 
-            // Если список пуст, можно скрыть заголовок (по желанию)
+            // Если список совсем пуст, скрываем заголовок
             View tvSaved = findViewById(R.id.tvSavedLabel);
-            if(favoritesList == null || favoritesList.isEmpty()) {
+            if(list == null || list.isEmpty()) {
                 tvSaved.setVisibility(View.GONE);
             } else {
                 tvSaved.setVisibility(View.VISIBLE);
+                // Можно менять текст заголовка, но "СОХРАНЕННЫЕ И ПОПУЛЯРНЫЕ" длинно
+                // Оставим просто заголовок, или можно убрать его в XML
             }
         });
 
@@ -65,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
             openWeather(recognizedCity);
         });
 
-        // --- ОСТАЛЬНАЯ ЛОГИКА (Навигация, Поиск и т.д.) ---
+        // --- UI ---
         View navHome = findViewById(R.id.navHome);
         View navProfile = findViewById(R.id.navProfile);
 
@@ -123,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        viewModel.loadFavorites();
+        viewModel.loadContent(); // Загружаем контент
     }
 
     private void openWeather(String cityName) {

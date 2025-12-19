@@ -1,0 +1,1930 @@
+Сборка контекста проекта...
+Дата: Sat Dec 20 01:08:25 RTZ 2025
+========================================
+
+## Структура проекта
+
+.
+./.gitignore
+./.gradle
+./.idea
+./app
+./app/.gitignore
+./app/build
+./app/build.gradle.kts
+./app/google-services.json
+./app/proguard-rules.pro
+./app/src
+./app/src/androidTest
+./app/src/main
+./app/src/test
+./build
+./build.gradle.kts
+./collect_context.sh
+./data
+./data/.gitignore
+./data/build
+./data/build.gradle.kts
+./data/consumer-rules.pro
+./data/proguard-rules.pro
+./data/src
+./data/src/androidTest
+./data/src/main
+./data/src/test
+./domain
+./domain/.gitignore
+./domain/build
+./domain/build.gradle.kts
+./domain/src
+./domain/src/main
+./gradle
+./gradle/libs.versions.toml
+./gradle/wrapper
+./gradle/wrapper/gradle-wrapper.jar
+./gradle/wrapper/gradle-wrapper.properties
+./gradle.properties
+./gradlew
+./gradlew.bat
+./local.properties
+./project_context.txt
+./settings.gradle.kts
+
+
+## build.gradle / build.gradle.kts
+
+### ./app/build.gradle.kts
+```gradle
+plugins {
+    alias(libs.plugins.android.application)
+    id("com.google.gms.google-services")
+}
+
+android {
+    namespace = "ru.mirea.musin.travelweather"
+    compileSdk = 35
+
+    defaultConfig {
+        applicationId = "ru.mirea.musin.travelweather"
+        minSdk = 33
+        targetSdk = 35
+        versionCode = 1
+        versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+
+    implementation(libs.appcompat)
+    implementation(libs.material)
+    implementation(libs.activity)
+    implementation(libs.constraintlayout)
+    implementation(libs.room.runtime.android)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
+
+    implementation(project(":domain"))
+    implementation(project(":data"))
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+}
+```
+
+### ./build.gradle.kts
+```gradle
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    dependencies {
+        // Проверь версию, можно 4.4.1 или новее
+        classpath("com.google.gms:google-services:4.4.1")
+    }
+}
+
+plugins {
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
+}
+
+
+```
+
+### ./data/build.gradle.kts
+```gradle
+plugins {
+    alias(libs.plugins.android.library)
+}
+
+android {
+    namespace = "ru.mirea.musin.data"
+    compileSdk = 35
+
+    defaultConfig {
+        minSdk = 33
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+
+    implementation(libs.appcompat)
+    implementation(libs.material)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
+
+
+    implementation(project(":domain"))
+
+    implementation("androidx.room:room-runtime:2.6.1")
+    annotationProcessor("androidx.room:room-compiler:2.6.1")
+
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+    implementation("com.google.firebase:firebase-auth")
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.google.code.gson:gson:2.10.1")
+}
+```
+
+### ./domain/build.gradle.kts
+```gradle
+plugins {
+    id("java-library")
+}
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+```
+
+## Kotlin файлы
+
+## Java файлы
+
+### ./app/src/androidTest/java/ru/mirea/musin/travelweather/ExampleInstrumentedTest.java
+```java
+package ru.mirea.musin.travelweather;
+
+import android.content.Context;
+
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import static org.junit.Assert.*;
+
+/**
+ * Instrumented test, which will execute on an Android device.
+ *
+ * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
+ */
+@RunWith(AndroidJUnit4.class)
+public class ExampleInstrumentedTest {
+    @Test
+    public void useAppContext() {
+        // Context of the app under test.
+        Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        assertEquals("ru.mirea.musin.travelweather", appContext.getPackageName());
+    }
+}
+```
+
+### ./app/src/main/java/ru/mirea/musin/travelweather/presentation/CityAdapter.java
+```java
+package ru.mirea.musin.travelweather.presentation;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import ru.mirea.musin.travelweather.R;
+import ru.mirea.musin.domain.models.City;
+
+public class CityAdapter extends RecyclerView.Adapter<CityAdapter.CityViewHolder> {
+
+    private List<City> cities = new ArrayList<>();
+    private final OnCityClickListener clickListener;
+    private final OnCityDeleteListener deleteListener;
+
+    public interface OnCityClickListener {
+        void onCityClick(City city);
+    }
+
+    public interface OnCityDeleteListener {
+        void onCityDelete(City city);
+    }
+
+    public CityAdapter(OnCityClickListener clickListener, OnCityDeleteListener deleteListener) {
+        this.clickListener = clickListener;
+        this.deleteListener = deleteListener;
+    }
+
+    public void setItems(List<City> newCities) {
+        this.cities = newCities;
+        notifyDataSetChanged();
+    }
+
+    @NonNull
+    @Override
+    public CityViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Используем уже существующий у вас макет item_city_removable
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_city_removable, parent, false);
+        return new CityViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull CityViewHolder holder, int position) {
+        holder.bind(cities.get(position));
+    }
+
+    @Override
+    public int getItemCount() {
+        return cities.size();
+    }
+
+    class CityViewHolder extends RecyclerView.ViewHolder {
+        private final TextView tvName;
+        private final TextView tvCountry;
+        private final View btnDelete;
+        private final View containerInfo;
+
+        public CityViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvName = itemView.findViewById(R.id.tvCityNameItem);
+            tvCountry = itemView.findViewById(R.id.tvCountryItem);
+            btnDelete = itemView.findViewById(R.id.btnDelete);
+            containerInfo = itemView.findViewById(R.id.containerInfo);
+        }
+
+        public void bind(City city) {
+            tvName.setText(city.getName());
+            tvCountry.setText("Сохранено");
+
+            containerInfo.setOnClickListener(v -> clickListener.onCityClick(city));
+            btnDelete.setOnClickListener(v -> deleteListener.onCityDelete(city));
+        }
+    }
+}
+```
+
+### ./app/src/main/java/ru/mirea/musin/travelweather/presentation/LoginActivity.java
+```java
+package ru.mirea.musin.travelweather.presentation;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+import ru.mirea.musin.travelweather.R;
+
+public class LoginActivity extends AppCompatActivity {
+
+    private FirebaseAuth auth;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FirebaseUser currentUser = auth.getCurrentUser();
+        if(currentUser != null){
+            openMainScreen();
+        }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+
+        auth = FirebaseAuth.getInstance();
+
+        EditText etEmail = findViewById(R.id.etEmail);
+        EditText etPass = findViewById(R.id.etPass);
+        Button btnLogin = findViewById(R.id.btnLogin);
+        TextView tvRegister = findViewById(R.id.tvRegisterLabel);
+
+        // ЛОГИКА НИЖНЕЙ ПАНЕЛИ
+        findViewById(R.id.navHome).setOnClickListener(v -> {
+            startActivity(new Intent(this, MainActivity.class));
+            overridePendingTransition(0, 0); // Без анимации
+        });
+
+        findViewById(R.id.navProfile).setOnClickListener(v -> {
+            // Мы уже тут
+        });
+
+        tvRegister.setOnClickListener(v -> {
+            startActivity(new Intent(this, RegisterActivity.class));
+        });
+
+        btnLogin.setOnClickListener(v -> {
+            String email = etEmail.getText().toString().trim();
+            String pass = etPass.getText().toString().trim();
+
+            if(email.isEmpty() || pass.isEmpty()) {
+                Toast.makeText(this, "Заполните поля", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            auth.signInWithEmailAndPassword(email, pass)
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            openMainScreen();
+                        } else {
+                            String msg = task.getException() != null ? task.getException().getMessage() : "Ошибка";
+                            Toast.makeText(this, "Ошибка: " + msg, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        });
+    }
+
+    private void openMainScreen() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
+    }
+}
+```
+
+### ./app/src/main/java/ru/mirea/musin/travelweather/presentation/MainActivity.java
+```java
+package ru.mirea.musin.travelweather.presentation;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import ru.mirea.musin.travelweather.R;
+
+public class MainActivity extends AppCompatActivity {
+
+    private AutoCompleteTextView etSearch;
+    private RecyclerView recyclerView;
+    private CityAdapter cityAdapter;
+    private FirebaseAuth auth;
+    private MainViewModel viewModel;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        auth = FirebaseAuth.getInstance();
+        etSearch = findViewById(R.id.etSearch);
+        ImageButton btnMic = findViewById(R.id.btnMic);
+        recyclerView = findViewById(R.id.recyclerView);
+
+        // --- ИНИЦИАЛИЗАЦИЯ RECYCLER VIEW ---
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        cityAdapter = new CityAdapter(
+                city -> openWeather(city.getName()), // Клик по городу
+                city -> viewModel.removeCity(city)   // Клик по удалению
+        );
+        recyclerView.setAdapter(cityAdapter);
+
+        // --- VIEW MODEL ---
+        viewModel = new ViewModelProvider(this, new ViewModelFactory(this)).get(MainViewModel.class);
+
+        // Подписываемся на LiveData и обновляем Адаптер
+        viewModel.getFavorites().observe(this, favoritesList -> {
+            cityAdapter.setItems(favoritesList);
+
+            // Если список пуст, можно скрыть заголовок (по желанию)
+            View tvSaved = findViewById(R.id.tvSavedLabel);
+            if(favoritesList == null || favoritesList.isEmpty()) {
+                tvSaved.setVisibility(View.GONE);
+            } else {
+                tvSaved.setVisibility(View.VISIBLE);
+            }
+        });
+
+        viewModel.getVoiceResult().observe(this, recognizedCity -> {
+            Toast.makeText(this, "Распознано: " + recognizedCity, Toast.LENGTH_SHORT).show();
+            openWeather(recognizedCity);
+        });
+
+        // --- ОСТАЛЬНАЯ ЛОГИКА (Навигация, Поиск и т.д.) ---
+        View navHome = findViewById(R.id.navHome);
+        View navProfile = findViewById(R.id.navProfile);
+
+        navHome.setOnClickListener(v -> {});
+
+        navProfile.setOnClickListener(v -> {
+            Intent intent;
+            if (auth.getCurrentUser() != null) {
+                intent = new Intent(this, ProfileActivity.class);
+            } else {
+                intent = new Intent(this, LoginActivity.class);
+            }
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+        });
+
+        View cardCurrent = findViewById(R.id.cardCurrent);
+        TextView tvCityName = findViewById(R.id.tvCityName);
+
+        cardCurrent.setOnClickListener(v -> {
+            String city = tvCityName.getText().toString();
+            openWeather(city);
+        });
+
+        String[] cities = getResources().getStringArray(R.array.cities_array);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, cities);
+        etSearch.setAdapter(adapter);
+
+        etSearch.setOnItemClickListener((parent, view, position, id) -> {
+            String city = (String) parent.getItemAtPosition(position);
+            openWeather(city);
+        });
+
+        etSearch.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                String query = etSearch.getText().toString().trim();
+                if (!query.isEmpty()) openWeather(query);
+                return true;
+            }
+            return false;
+        });
+
+        btnMic.setOnClickListener(v -> {
+            if (auth.getCurrentUser() == null) {
+                Toast.makeText(this, "Доступно только авторизованным пользователям", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Toast.makeText(this, "Слушаю...", Toast.LENGTH_SHORT).show();
+            viewModel.recognizeSpeech();
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        viewModel.loadFavorites();
+    }
+
+    private void openWeather(String cityName) {
+        Intent intent = new Intent(this, WeatherActivity.class);
+        intent.putExtra("CITY_NAME", cityName);
+        startActivity(intent);
+        etSearch.setText("");
+    }
+}
+```
+
+### ./app/src/main/java/ru/mirea/musin/travelweather/presentation/MainViewModel.java
+```java
+package ru.mirea.musin.travelweather.presentation;
+
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import ru.mirea.musin.domain.models.City;
+import ru.mirea.musin.domain.repository.FavoritesRepository;
+import ru.mirea.musin.domain.repository.VoiceRepository;
+import ru.mirea.musin.domain.usecases.GetFavorites;
+import ru.mirea.musin.domain.usecases.RecognizeVoiceToCity;
+import ru.mirea.musin.domain.usecases.RemoveCityFromFavorites;
+
+public class MainViewModel extends ViewModel {
+
+    private final FavoritesRepository favRepo;
+    private final VoiceRepository voiceRepo;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    private final MutableLiveData<List<City>> favoritesLiveData = new MutableLiveData<>();
+    private final MutableLiveData<String> voiceResultLiveData = new MutableLiveData<>();
+
+    public MainViewModel(FavoritesRepository favRepo, VoiceRepository voiceRepo) {
+        this.favRepo = favRepo;
+        this.voiceRepo = voiceRepo;
+    }
+
+    public LiveData<List<City>> getFavorites() {
+        return favoritesLiveData;
+    }
+
+    public LiveData<String> getVoiceResult() {
+        return voiceResultLiveData;
+    }
+
+    public void loadFavorites() {
+        executor.execute(() -> {
+            List<City> cities = new GetFavorites(favRepo).execute();
+            favoritesLiveData.postValue(cities);
+        });
+    }
+
+    public void removeCity(City city) {
+        executor.execute(() -> {
+            new RemoveCityFromFavorites(favRepo).execute(city);
+            loadFavorites();
+        });
+    }
+
+    public void recognizeSpeech() {
+        executor.execute(() -> {
+            String city = new RecognizeVoiceToCity(voiceRepo).execute(new byte[0]);
+            voiceResultLiveData.postValue(city);
+        });
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        executor.shutdown();
+    }
+}
+```
+
+### ./app/src/main/java/ru/mirea/musin/travelweather/presentation/ProfileActivity.java
+```java
+package ru.mirea.musin.travelweather.presentation;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.TextView;
+import androidx.appcompat.app.AppCompatActivity;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import ru.mirea.musin.travelweather.R;
+
+public class ProfileActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_profile);
+
+        TextView tvEmail = findViewById(R.id.tvProfileEmail);
+        Button btnLogout = findViewById(R.id.btnLogout);
+
+        // ЛОГИКА НИЖНЕЙ ПАНЕЛИ
+        findViewById(R.id.navHome).setOnClickListener(v -> {
+            startActivity(new Intent(this, MainActivity.class));
+            overridePendingTransition(0, 0); // Без анимации
+        });
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            tvEmail.setText(user.getEmail());
+        } else {
+            tvEmail.setText("Гость");
+        }
+
+        btnLogout.setOnClickListener(v -> {
+            FirebaseAuth.getInstance().signOut();
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+        });
+    }
+}
+```
+
+### ./app/src/main/java/ru/mirea/musin/travelweather/presentation/RegisterActivity.java
+```java
+package ru.mirea.musin.travelweather.presentation;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import com.google.firebase.auth.FirebaseAuth;
+import ru.mirea.musin.travelweather.R;
+
+public class RegisterActivity extends AppCompatActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_register);
+
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+
+        EditText etEmail = findViewById(R.id.etEmail);
+        EditText etPass = findViewById(R.id.etPass);
+        Button btnReg = findViewById(R.id.btnRegister);
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+
+        btnReg.setOnClickListener(v -> {
+            String email = etEmail.getText().toString();
+            String pass = etPass.getText().toString();
+
+            if (email.isEmpty() || pass.isEmpty()) return;
+
+            // Используем Firebase напрямую для простоты (или через UseCase)
+            auth.createUserWithEmailAndPassword(email, pass)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(this, "Успешно! Теперь войдите.", Toast.LENGTH_LONG).show();
+                            finish(); // Закрываем экран регистрации
+                        } else {
+                            String error = task.getException() != null ? task.getException().getMessage() : "Ошибка";
+                            Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        });
+    }
+}
+```
+
+### ./app/src/main/java/ru/mirea/musin/travelweather/presentation/ViewModelFactory.java
+```java
+package ru.mirea.musin.travelweather.presentation;
+
+import android.content.Context;
+import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.room.Room;
+
+import ru.mirea.musin.data.database.AppDatabase;
+import ru.mirea.musin.data.repository.FavoritesRepositoryImpl;
+import ru.mirea.musin.data.repository.VoiceRepositoryImpl;
+import ru.mirea.musin.data.repository.WeatherRepositoryImpl;
+import ru.mirea.musin.domain.repository.FavoritesRepository;
+import ru.mirea.musin.domain.repository.VoiceRepository;
+import ru.mirea.musin.domain.repository.WeatherRepository;
+
+public class ViewModelFactory implements ViewModelProvider.Factory {
+
+    private final Context context;
+
+    public ViewModelFactory(Context context) {
+        this.context = context.getApplicationContext();
+    }
+
+    @NonNull
+    @Override
+    public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+        AppDatabase db = Room.databaseBuilder(context, AppDatabase.class, "weather-db")
+                .allowMainThreadQueries()
+                .fallbackToDestructiveMigration()
+                .build();
+
+        FavoritesRepository favRepo = new FavoritesRepositoryImpl(db);
+        WeatherRepository weatherRepo = new WeatherRepositoryImpl();
+        VoiceRepository voiceRepo = new VoiceRepositoryImpl();
+
+        if (modelClass.isAssignableFrom(MainViewModel.class)) {
+            return (T) new MainViewModel(favRepo, voiceRepo);
+        }
+        else if (modelClass.isAssignableFrom(WeatherViewModel.class)) {
+            return (T) new WeatherViewModel(weatherRepo, favRepo);
+        }
+
+        throw new IllegalArgumentException("Unknown ViewModel class");
+    }
+}
+```
+
+### ./app/src/main/java/ru/mirea/musin/travelweather/presentation/WeatherActivity.java
+```java
+package ru.mirea.musin.travelweather.presentation;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import ru.mirea.musin.travelweather.R;
+import ru.mirea.musin.domain.models.WeatherNow;
+
+public class WeatherActivity extends AppCompatActivity {
+
+    private Button btnAction;
+    private String finalCityName;
+    private WeatherViewModel viewModel; // ViewModel
+
+    // UI Элементы (поля класса, чтобы видеть их в Observer)
+    private TextView tvTemp, tvDate;
+    private ImageView ivBigSun;
+    private LinearLayout forecastContainer, hourlyContainer;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_weather);
+
+        String cityName = getIntent().getStringExtra("CITY_NAME");
+        if (cityName == null) cityName = "Москва";
+        finalCityName = cityName;
+
+        // 1. Инициализация ViewModel
+        viewModel = new ViewModelProvider(this, new ViewModelFactory(this)).get(WeatherViewModel.class);
+
+        initViews();
+
+        TextView tvTitle = findViewById(R.id.tvCityTitle);
+        tvTitle.setText(finalCityName);
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM • HH:mm", new Locale("ru"));
+        sdf.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
+        tvDate.setText("Сегодня, " + sdf.format(new Date()));
+
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+
+        // Кнопка Избранного вызывает метод ViewModel
+        btnAction.setOnClickListener(v -> {
+            viewModel.toggleFavorite(finalCityName);
+        });
+
+        // 2. ПОДПИСКА НА ДАННЫЕ (LIVEDATA)
+
+        // Текущая погода
+        viewModel.getCurrentWeather().observe(this, weather -> {
+            if (weather == null) return;
+            tvTemp.setText(String.format("%.1f°", weather.getTempC()));
+            ivBigSun.setImageResource(getIconByCondition(weather.getCondition(), weather.isDay()));
+        });
+
+        // Прогноз (почасовой + 5 дней)
+        viewModel.getForecast().observe(this, allForecasts -> {
+            fillHourlyForecast(allForecasts);
+            fillDailyForecast(allForecasts);
+        });
+
+        // Статус избранного (меняет цвет кнопки)
+        viewModel.getIsFavorite().observe(this, isFav -> {
+            if (isFav) {
+                btnAction.setText("Удалить из избранного");
+                btnAction.setBackgroundColor(0xFFCC0000);
+            } else {
+                btnAction.setText("В избранное");
+                btnAction.setBackgroundColor(0xFF2C2C2C);
+            }
+        });
+
+        // Ошибки
+        viewModel.getError().observe(this, errorMsg -> {
+            Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
+        });
+
+        // 3. Запуск загрузки
+        viewModel.loadWeather(finalCityName);
+    }
+
+    private void initViews() {
+        tvTemp = findViewById(R.id.tvTempBig);
+        tvDate = findViewById(R.id.tvDate);
+        ivBigSun = findViewById(R.id.ivBigSun);
+        btnAction = findViewById(R.id.btnMap);
+        forecastContainer = findViewById(R.id.forecastContainer);
+        hourlyContainer = findViewById(R.id.hourlyContainer);
+    }
+
+    private void fillHourlyForecast(List<WeatherNow> allForecasts) {
+        hourlyContainer.removeAllViews();
+        LayoutInflater inflater = LayoutInflater.from(this);
+        SimpleDateFormat hourFormat = new SimpleDateFormat("HH:mm");
+        hourFormat.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
+
+        int hourlyCount = 0;
+        for(WeatherNow item : allForecasts) {
+            if (hourlyCount >= 6) break;
+
+            View view = inflater.inflate(R.layout.item_hourly, hourlyContainer, false);
+            TextView tvHour = view.findViewById(R.id.tvHour);
+            TextView tvHourTemp = view.findViewById(R.id.tvHourTemp);
+            ImageView ivHourIcon = view.findViewById(R.id.ivHourIcon);
+
+            Date d = new Date((long)item.getCityId() * 1000);
+            tvHour.setText(hourFormat.format(d));
+            tvHourTemp.setText(String.format("%.0f°", item.getTempC()));
+            ivHourIcon.setImageResource(getIconByCondition(item.getCondition(), item.isDay()));
+
+            hourlyContainer.addView(view);
+            hourlyCount++;
+        }
+    }
+
+    private void fillDailyForecast(List<WeatherNow> allForecasts) {
+        forecastContainer.removeAllViews();
+        LayoutInflater inflater = LayoutInflater.from(this);
+        SimpleDateFormat dayFormat = new SimpleDateFormat("EE", new Locale("ru"));
+
+        String lastDay = "";
+        int daysCount = 0;
+
+        for (WeatherNow item : allForecasts) {
+            Date d = new Date((long)item.getCityId() * 1000);
+            String dayStr = dayFormat.format(d).toUpperCase();
+
+            if (!dayStr.equals(lastDay)) {
+                if (daysCount >= 5) break;
+
+                View view = inflater.inflate(R.layout.item_forecast_row, forecastContainer, false);
+                TextView tvDay = view.findViewById(R.id.tvDay);
+                TextView tvDesc = view.findViewById(R.id.tvDesc);
+                TextView tvTempSmall = view.findViewById(R.id.tvTempSmall);
+                ImageView ivIcon = view.findViewById(R.id.ivForecastIcon);
+
+                tvDay.setText(dayStr);
+                String cond = item.getCondition().split("\\|")[0];
+                tvDesc.setText(cond);
+                tvTempSmall.setText(String.format("%.0f°", item.getTempC()));
+                ivIcon.setImageResource(getIconByCondition(cond, true));
+
+                forecastContainer.addView(view);
+                lastDay = dayStr;
+                daysCount++;
+            }
+        }
+    }
+
+    private int getIconByCondition(String condition, boolean isDay) {
+        String c = condition.toLowerCase();
+        if (c.contains("гроз") || c.contains("storm") || c.contains("thunder")) return R.drawable.ic_storm;
+        if (c.contains("снег") || c.contains("snow") || c.contains("sleet") || c.contains("blizzard") || c.contains("ice")) return R.drawable.ic_cloud_snow;
+        if (c.contains("дождь") || c.contains("rain") || c.contains("drizzle") || c.contains("shower")) return R.drawable.ic_rain;
+        if (c.contains("туман") || c.contains("fog") || c.contains("mist") || c.contains("haze") || c.contains("мгла")) return R.drawable.ic_fog;
+        if (c.contains("пасмурно") || c.contains("overcast")) return R.drawable.ic_cloud;
+        if (c.contains("обла") || c.contains("cloud")) return isDay ? R.drawable.ic_cloud_sun : R.drawable.ic_cloud_moon;
+        if (c.contains("ясно") || c.contains("clear")) return isDay ? R.drawable.ic_sun_yellow : R.drawable.ic_moon;
+        return isDay ? R.drawable.ic_sun_yellow : R.drawable.ic_moon;
+    }
+}
+```
+
+### ./app/src/main/java/ru/mirea/musin/travelweather/presentation/WeatherViewModel.java
+```java
+package ru.mirea.musin.travelweather.presentation;
+
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import ru.mirea.musin.domain.models.City;
+import ru.mirea.musin.domain.models.WeatherNow;
+import ru.mirea.musin.domain.repository.FavoritesRepository;
+import ru.mirea.musin.domain.repository.WeatherRepository;
+import ru.mirea.musin.domain.usecases.AddCityToFavorites;
+import ru.mirea.musin.domain.usecases.RemoveCityFromFavorites;
+
+public class WeatherViewModel extends ViewModel {
+
+    private final WeatherRepository weatherRepo;
+    private final FavoritesRepository favRepo;
+    private final ExecutorService executor = Executors.newFixedThreadPool(2);
+
+    // Данные для UI
+    private final MutableLiveData<WeatherNow> currentWeather = new MutableLiveData<>();
+    private final MutableLiveData<List<WeatherNow>> forecast = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isFavorite = new MutableLiveData<>();
+    private final MutableLiveData<String> error = new MutableLiveData<>();
+
+    public WeatherViewModel(WeatherRepository weatherRepo, FavoritesRepository favRepo) {
+        this.weatherRepo = weatherRepo;
+        this.favRepo = favRepo;
+    }
+
+    public LiveData<WeatherNow> getCurrentWeather() { return currentWeather; }
+    public LiveData<List<WeatherNow>> getForecast() { return forecast; }
+    public LiveData<Boolean> getIsFavorite() { return isFavorite; }
+    public LiveData<String> getError() { return error; }
+
+    public void loadWeather(String cityName) {
+        executor.execute(() -> {
+            boolean isFav = favRepo.isFavorite(cityName);
+            isFavorite.postValue(isFav);
+        });
+
+        executor.execute(() -> {
+            WeatherNow now = weatherRepo.getForecastByCity(cityName);
+            List<WeatherNow> daily = weatherRepo.get5DayForecast(cityName);
+
+            if (now != null) {
+                currentWeather.postValue(now);
+                forecast.postValue(daily);
+            } else {
+                error.postValue("Не удалось загрузить данные для города: " + cityName);
+            }
+        });
+    }
+
+    public void toggleFavorite(String cityName) {
+        executor.execute(() -> {
+            City cityObj = new City(cityName.hashCode(), cityName, "RU");
+            boolean currentStatus = favRepo.isFavorite(cityName);
+
+            if (currentStatus) {
+                new RemoveCityFromFavorites(favRepo).execute(cityObj);
+                isFavorite.postValue(false);
+            } else {
+                new AddCityToFavorites(favRepo).execute(cityObj);
+                isFavorite.postValue(true);
+            }
+        });
+    }
+}
+```
+
+### ./app/src/test/java/ru/mirea/musin/travelweather/ExampleUnitTest.java
+```java
+package ru.mirea.musin.travelweather;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+/**
+ * Example local unit test, which will execute on the development machine (host).
+ *
+ * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
+ */
+public class ExampleUnitTest {
+    @Test
+    public void addition_isCorrect() {
+        assertEquals(4, 2 + 2);
+    }
+}
+```
+
+### ./data/src/androidTest/java/ru/mirea/musin/data/ExampleInstrumentedTest.java
+```java
+package ru.mirea.musin.data;
+
+import android.content.Context;
+
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import static org.junit.Assert.*;
+
+/**
+ * Instrumented test, which will execute on an Android device.
+ *
+ * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
+ */
+@RunWith(AndroidJUnit4.class)
+public class ExampleInstrumentedTest {
+    @Test
+    public void useAppContext() {
+        // Context of the app under test.
+        Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        assertEquals("ru.mirea.musin.data.test", appContext.getPackageName());
+    }
+}
+```
+
+### ./data/src/main/java/ru/mirea/musin/data/database/AppDatabase.java
+```java
+package ru.mirea.musin.data.database;
+
+import androidx.room.Database;
+import androidx.room.RoomDatabase;
+
+@Database(entities = {CityEntity.class}, version = 2)
+public abstract class AppDatabase extends RoomDatabase {
+    public abstract CityDao cityDao();
+}
+```
+
+### ./data/src/main/java/ru/mirea/musin/data/database/CityDao.java
+```java
+package ru.mirea.musin.data.database;
+
+import androidx.room.Dao;
+import androidx.room.Delete;
+import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
+import androidx.room.Query;
+
+import java.util.List;
+
+@Dao
+public interface CityDao {
+    // Получаем города только конкретного владельца (userId)
+    @Query("SELECT * FROM cities WHERE owner_id = :ownerId")
+    List<CityEntity> getAllForUser(String ownerId);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insert(CityEntity city);
+
+    @Delete
+    void delete(CityEntity city);
+
+    // Ищем город по имени И по владельцу
+    @Query("SELECT * FROM cities WHERE name = :cityName AND owner_id = :ownerId LIMIT 1")
+    CityEntity getByNameAndUser(String cityName, String ownerId);
+}
+```
+
+### ./data/src/main/java/ru/mirea/musin/data/database/CityEntity.java
+```java
+package ru.mirea.musin.data.database;
+
+import androidx.room.ColumnInfo; // Добавь этот импорт
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+import ru.mirea.musin.domain.models.City;
+
+@Entity(tableName = "cities")
+public class CityEntity {
+    @PrimaryKey(autoGenerate = true)
+    public int id;
+
+    public String name;
+    public String country;
+
+    // НОВОЕ ПОЛЕ: Кто сохранил город (email пользователя или "guest")
+    @ColumnInfo(name = "owner_id")
+    public String ownerId;
+
+    public CityEntity() {}
+
+    public CityEntity(int id, String name, String country, String ownerId) {
+        this.id = id;
+        this.name = name;
+        this.country = country;
+        this.ownerId = ownerId;
+    }
+
+    // Здесь мы пока поставим заглушку ownerId, реальный ID подставит репозиторий
+    public static CityEntity fromDomain(City city) {
+        return new CityEntity(city.getId(), city.getName(), city.getCountry(), "guest");
+    }
+
+    public City toDomain() {
+        return new City(this.id, this.name, this.country);
+    }
+}
+```
+
+### ./data/src/main/java/ru/mirea/musin/data/network/model/ForecastResponse.java
+```java
+package ru.mirea.musin.data.network.model;
+import com.google.gson.annotations.SerializedName;
+import java.util.List;
+
+public class ForecastResponse {
+    @SerializedName("list") public List<WeatherResponse> list;
+}
+```
+
+### ./data/src/main/java/ru/mirea/musin/data/network/model/WeatherResponse.java
+```java
+package ru.mirea.musin.data.network.model;
+import com.google.gson.annotations.SerializedName;
+import java.util.List;
+
+public class WeatherResponse {
+    @SerializedName("main") public Main main;
+    @SerializedName("weather") public List<Weather> weather;
+    @SerializedName("wind") public Wind wind;
+    @SerializedName("dt") public long dt;
+    @SerializedName("name") public String name;
+    @SerializedName("sys") public Sys sys; // <--- ДОБАВИЛИ
+
+    public static class Main {
+        public double temp;
+        public double humidity;
+    }
+    public static class Weather {
+        public String description;
+        public String main;
+    }
+    public static class Wind {
+        public double speed;
+    }
+
+    // <--- НОВЫЙ КЛАСС
+    public static class Sys {
+        public long sunrise;
+        public long sunset;
+        public String pod; // "d" - day, "n" - night (есть в прогнозе)
+    }
+}
+```
+
+### ./data/src/main/java/ru/mirea/musin/data/network/NetworkApi.java
+```java
+package ru.mirea.musin.data.network;
+
+import ru.mirea.musin.domain.models.WeatherNow;
+
+public class NetworkApi {
+    // Имитация запроса в интернет
+    public WeatherNow getWeatherFromApi(String city) {
+        try {
+            Thread.sleep(1000); // Задержка 1 секунда
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // ИСПРАВЛЕНИЕ: Добавили "1" (cityId) первым параметром
+        return new WeatherNow(1, 20.0, "Солнечно (Network Mock)");
+    }
+}
+```
+
+### ./data/src/main/java/ru/mirea/musin/data/network/OpenWeatherApi.java
+```java
+package ru.mirea.musin.data.network;
+
+import ru.mirea.musin.data.network.model.ForecastResponse;
+import ru.mirea.musin.data.network.model.WeatherResponse;
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Query;
+
+public interface OpenWeatherApi {
+    @GET("data/2.5/weather")
+    Call<WeatherResponse> getCurrentWeather(
+            @Query("q") String cityName,
+            @Query("appid") String apiKey,
+            @Query("units") String units, // metric
+            @Query("lang") String lang    // ru
+    );
+
+    @GET("data/2.5/forecast")
+    Call<ForecastResponse> getForecast(
+            @Query("q") String cityName,
+            @Query("appid") String apiKey,
+            @Query("units") String units,
+            @Query("lang") String lang
+    );
+}
+```
+
+### ./data/src/main/java/ru/mirea/musin/data/prefs/UserPreferences.java
+```java
+package ru.mirea.musin.data.prefs;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+
+public class UserPreferences {
+    private final SharedPreferences prefs;
+
+    public UserPreferences(Context context) {
+        prefs = context.getSharedPreferences("user_settings", Context.MODE_PRIVATE);
+    }
+
+    public void saveLastEmail(String email) {
+        prefs.edit().putString("last_email", email).apply();
+    }
+
+    public String getLastEmail() {
+        return prefs.getString("last_email", "Гость");
+    }
+}
+```
+
+### ./data/src/main/java/ru/mirea/musin/data/repository/AuthRepositoryImpl.java
+```java
+package ru.mirea.musin.data.repository;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import ru.mirea.musin.domain.models.User;
+import ru.mirea.musin.domain.repository.AuthRepository;
+
+public class AuthRepositoryImpl implements AuthRepository {
+    private final FirebaseAuth auth = FirebaseAuth.getInstance();
+
+    @Override
+    public User login(String email, String password) {
+        auth.signInWithEmailAndPassword(email, password);
+        FirebaseUser fbUser = auth.getCurrentUser();
+        if (fbUser != null) return new User(1, fbUser.getEmail());
+        return new User(0, "Guest");
+    }
+
+    // РЕАЛИЗАЦИЯ РЕГИСТРАЦИИ
+    @Override
+    public User register(String email, String password) {
+        auth.createUserWithEmailAndPassword(email, password);
+        FirebaseUser fbUser = auth.getCurrentUser();
+        if (fbUser != null) return new User(1, fbUser.getEmail());
+        return new User(0, "Error");
+    }
+
+    @Override
+    public void logout() {
+        auth.signOut();
+    }
+}
+```
+
+### ./data/src/main/java/ru/mirea/musin/data/repository/FavoritesRepositoryImpl.java
+```java
+package ru.mirea.musin.data.repository;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import ru.mirea.musin.data.database.AppDatabase;
+import ru.mirea.musin.data.database.CityEntity;
+import ru.mirea.musin.domain.models.City;
+import ru.mirea.musin.domain.repository.FavoritesRepository;
+
+public class FavoritesRepositoryImpl implements FavoritesRepository {
+
+    private final AppDatabase db;
+    private final FirebaseAuth auth;
+
+    public FavoritesRepositoryImpl(AppDatabase db) {
+        this.db = db;
+        this.auth = FirebaseAuth.getInstance();
+    }
+
+    // Вспомогательный метод: получаем текущего ID (email) или "guest"
+    private String getCurrentOwnerId() {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user != null && user.getEmail() != null) {
+            return user.getEmail();
+        }
+        return "guest";
+    }
+
+    @Override
+    public boolean addCity(City city) {
+        try {
+            String owner = getCurrentOwnerId();
+            // Проверяем, есть ли уже такой город у ЭТОГО пользователя
+            if (isFavorite(city.getName())) {
+                return false;
+            }
+
+            // Создаем сущность с ownerId
+            CityEntity entity = new CityEntity(0, city.getName(), city.getCountry(), owner);
+            db.cityDao().insert(entity);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean removeCity(City city) {
+        try {
+            String owner = getCurrentOwnerId();
+            // Ищем город именно у этого пользователя
+            CityEntity existing = db.cityDao().getByNameAndUser(city.getName(), owner);
+
+            if (existing != null) {
+                db.cityDao().delete(existing);
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public List<City> getFavorites() {
+        List<City> result = new ArrayList<>();
+        try {
+            String owner = getCurrentOwnerId();
+            // Загружаем только города текущего пользователя
+            List<CityEntity> entities = db.cityDao().getAllForUser(owner);
+            for (CityEntity entity : entities) {
+                result.add(entity.toDomain());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    @Override
+    public boolean isFavorite(String cityName) {
+        try {
+            String owner = getCurrentOwnerId();
+            return db.cityDao().getByNameAndUser(cityName, owner) != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+}
+```
+
+### ./data/src/main/java/ru/mirea/musin/data/repository/VoiceRepositoryImpl.java
+```java
+package ru.mirea.musin.data.repository;
+
+import java.util.Random;
+import ru.mirea.musin.domain.repository.VoiceRepository;
+
+public class VoiceRepositoryImpl implements VoiceRepository {
+
+    // Список городов для рандомного выбора
+    private final String[] MOCK_CITIES = {
+            "Москва",
+            "Санкт-Петербург",
+            "Лондон",
+            "Париж",
+            "Нью-Йорк",
+            "Токио",
+            "Дубай",
+            "Берлин",
+            "Рим",
+            "Стамбул",
+            "Казань",
+            "Сочи",
+            "Екатеринбург",
+            "Новосибирск",
+            "Калининград"
+    };
+
+    private final Random random = new Random();
+
+    @Override
+    public String recognizeCity(byte[] audioData) {
+        // Имитация задержки обработки (как будто отправляем голос на сервер)
+        try {
+            Thread.sleep(1500); // 1.5 секунды "думаем"
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // Выбираем случайный город из списка
+        int index = random.nextInt(MOCK_CITIES.length);
+        return MOCK_CITIES[index];
+    }
+}
+```
+
+### ./data/src/main/java/ru/mirea/musin/data/repository/WeatherRepositoryImpl.java
+```java
+package ru.mirea.musin.data.repository;
+
+import android.util.Log;
+import java.util.ArrayList;
+import java.util.List;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import ru.mirea.musin.data.network.OpenWeatherApi;
+import ru.mirea.musin.data.network.model.ForecastResponse;
+import ru.mirea.musin.data.network.model.WeatherResponse;
+import ru.mirea.musin.domain.models.City;
+import ru.mirea.musin.domain.models.WeatherNow;
+import ru.mirea.musin.domain.repository.WeatherRepository;
+
+public class WeatherRepositoryImpl implements WeatherRepository {
+    private final OpenWeatherApi api;
+    private final String API_KEY = "c46f8646fcbbab02b1eccd639673be3a";
+
+    public WeatherRepositoryImpl() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.openweathermap.org/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        api = retrofit.create(OpenWeatherApi.class);
+    }
+
+    @Override
+    public WeatherNow getForecastByCity(String cityName) {
+        try {
+            Response<WeatherResponse> response = api.getCurrentWeather(cityName, API_KEY, "metric", "ru").execute();
+
+            if (response.isSuccessful() && response.body() != null) {
+                WeatherResponse w = response.body();
+                String condition = w.weather.get(0).description;
+                String complexCondition = condition + "|" + w.main.humidity + "|" + w.wind.speed;
+
+                // --- ЛОГИКА ДЕНЬ/НОЧЬ ---
+                boolean isDay = true;
+                if (w.sys != null) {
+                    long now = System.currentTimeMillis() / 1000;
+                    // Если сейчас больше рассвета И меньше заката = День
+                    isDay = (now > w.sys.sunrise && now < w.sys.sunset);
+                }
+
+                return new WeatherNow(1, w.main.temp, complexCondition, isDay); // Передаем isDay
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<WeatherNow> get5DayForecast(String cityName) {
+        List<WeatherNow> result = new ArrayList<>();
+        try {
+            Response<ForecastResponse> response = api.getForecast(cityName, API_KEY, "metric", "ru").execute();
+            if (response.isSuccessful() && response.body() != null) {
+                List<WeatherResponse> list = response.body().list;
+
+                // ВАЖНО: Возвращаем ВСЕ элементы (каждые 3 часа)
+                // А Activity сама решит, какие показывать в "почасовом", а какие в "5 дней"
+                for (WeatherResponse item : list) {
+                    // В прогнозе есть поле sys.pod ("d" или "n")
+                    boolean isDay = "d".equals(item.sys.pod);
+
+                    result.add(new WeatherNow((int)item.dt, item.main.temp, item.weather.get(0).description, isDay));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    @Override public List<City> getCityList() { return new ArrayList<>(); }
+    @Override public List<City> searchCity(String query) { return new ArrayList<>(); }
+    @Override public boolean syncWeatherFromApi() { return true; }
+}
+```
+
+### ./data/src/test/java/ru/mirea/musin/data/ExampleUnitTest.java
+```java
+package ru.mirea.musin.data;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+/**
+ * Example local unit test, which will execute on the development machine (host).
+ *
+ * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
+ */
+public class ExampleUnitTest {
+    @Test
+    public void addition_isCorrect() {
+        assertEquals(4, 2 + 2);
+    }
+}
+```
+
+### ./domain/src/main/java/ru/mirea/musin/domain/models/City.java
+```java
+package ru.mirea.musin.domain.models;
+
+public class City {
+    private final int id;
+    private final String name;
+    private final String country;
+
+    public City(int id, String name, String country) {
+        this.id = id;
+        this.name = name;
+        this.country = country;
+    }
+    public int getId() { return id; }
+    public String getName() { return name; }
+    public String getCountry() { return country; }
+}
+```
+
+### ./domain/src/main/java/ru/mirea/musin/domain/models/User.java
+```java
+package ru.mirea.musin.domain.models;
+
+public class User {
+    private final int id;
+    private final String name;
+
+    public User(int id, String name) {
+        this.id = id; this.name = name;
+    }
+    public int getId() { return id; }
+    public String getName() { return name; }
+}
+
+```
+
+### ./domain/src/main/java/ru/mirea/musin/domain/models/WeatherNow.java
+```java
+package ru.mirea.musin.domain.models;
+
+public class WeatherNow {
+    private final int cityId;
+    private final double tempC;
+    private final String condition;
+    private final boolean isDay; // <--- НОВОЕ ПОЛЕ
+
+    // Старый конструктор (для совместимости)
+    public WeatherNow(int cityId, double tempC, String condition) {
+        this(cityId, tempC, condition, true); // По умолчанию день
+    }
+
+    // Новый конструктор
+    public WeatherNow(int cityId, double tempC, String condition, boolean isDay) {
+        this.cityId = cityId;
+        this.tempC = tempC;
+        this.condition = condition;
+        this.isDay = isDay;
+    }
+
+    public int getCityId() { return cityId; }
+    public double getTempC() { return tempC; }
+    public String getCondition() { return condition; }
+    public boolean isDay() { return isDay; } // Геттер
+}
+```
+
+### ./domain/src/main/java/ru/mirea/musin/domain/MyClass.java
+```java
+package ru.mirea.musin.domain;
+
+public class MyClass {
+}
+```
+
+### ./domain/src/main/java/ru/mirea/musin/domain/repository/AuthRepository.java
+```java
+package ru.mirea.musin.domain.repository;
+import ru.mirea.musin.domain.models.User;
+
+public interface AuthRepository {
+    User login(String email, String password);
+    User register(String email, String password); // <--- НОВЫЙ МЕТОД
+    void logout();
+}
+```
+
+### ./domain/src/main/java/ru/mirea/musin/domain/repository/FavoritesRepository.java
+```java
+package ru.mirea.musin.domain.repository;
+
+import java.util.List;
+import ru.mirea.musin.domain.models.City;
+
+public interface FavoritesRepository {
+    boolean isFavorite(String cityName);
+    boolean addCity(City city);
+    boolean removeCity(City city);
+    List<City> getFavorites();
+}
+```
+
+### ./domain/src/main/java/ru/mirea/musin/domain/repository/VoiceRepository.java
+```java
+package ru.mirea.musin.domain.repository;
+
+public interface VoiceRepository {
+    // Принимает байты аудио (заглушка), возвращает название города
+    String recognizeCity(byte[] audioData);
+}
+```
+
+### ./domain/src/main/java/ru/mirea/musin/domain/repository/WeatherRepository.java
+```java
+package ru.mirea.musin.domain.repository;
+
+import java.util.List;
+import ru.mirea.musin.domain.models.City;
+import ru.mirea.musin.domain.models.WeatherNow;
+
+public interface WeatherRepository {
+    List<City> getCityList();
+    List<City> searchCity(String query);
+    WeatherNow getForecastByCity(String cityName);
+    boolean syncWeatherFromApi();
+
+    // --- ДОБАВЬ ВОТ ЭТУ СТРОКУ ---
+    List<WeatherNow> get5DayForecast(String cityName);
+}
+```
+
+### ./domain/src/main/java/ru/mirea/musin/domain/usecases/AddCityToFavorites.java
+```java
+package ru.mirea.musin.domain.usecases;
+
+import ru.mirea.musin.domain.models.City;
+import ru.mirea.musin.domain.repository.FavoritesRepository;
+
+public class AddCityToFavorites {
+    private final FavoritesRepository repo;
+    public AddCityToFavorites(FavoritesRepository repo) { this.repo = repo; }
+    public boolean execute(City city) { return repo.addCity(city); }
+}
+```
+
+### ./domain/src/main/java/ru/mirea/musin/domain/usecases/GetCityList.java
+```java
+package ru.mirea.musin.domain.usecases;
+
+import java.util.List;
+import ru.mirea.musin.domain.models.City;
+import ru.mirea.musin.domain.repository.WeatherRepository;
+
+public class GetCityList {
+    private final WeatherRepository repo;
+    public GetCityList(WeatherRepository repo) { this.repo = repo; }
+    public List<City> execute() { return repo.getCityList(); }
+}
+```
+
+### ./domain/src/main/java/ru/mirea/musin/domain/usecases/GetFavorites.java
+```java
+package ru.mirea.musin.domain.usecases;
+
+import java.util.List;
+import ru.mirea.musin.domain.models.City;
+import ru.mirea.musin.domain.repository.FavoritesRepository;
+
+public class GetFavorites {
+    private final FavoritesRepository repo;
+    public GetFavorites(FavoritesRepository repo) { this.repo = repo; }
+    public List<City> execute() { return repo.getFavorites(); }
+}
+```
+
+### ./domain/src/main/java/ru/mirea/musin/domain/usecases/GetForecastByCity.java
+```java
+package ru.mirea.musin.domain.usecases;
+
+import ru.mirea.musin.domain.models.WeatherNow;
+import ru.mirea.musin.domain.repository.WeatherRepository;
+
+public class GetForecastByCity {
+    private final WeatherRepository repo;
+    public GetForecastByCity(WeatherRepository repo) { this.repo = repo; }
+    public WeatherNow execute(String cityName) { return repo.getForecastByCity(cityName); }
+}
+
+```
+
+### ./domain/src/main/java/ru/mirea/musin/domain/usecases/LoginUser.java
+```java
+package ru.mirea.musin.domain.usecases;
+
+import ru.mirea.musin.domain.models.User;
+import ru.mirea.musin.domain.repository.AuthRepository;
+
+public class LoginUser {
+    private final AuthRepository repo;
+    public LoginUser(AuthRepository repo) { this.repo = repo; }
+    public User execute(String email, String password) { return repo.login(email, password); }
+}
+```
+
+### ./domain/src/main/java/ru/mirea/musin/domain/usecases/RecognizeVoiceToCity.java
+```java
+package ru.mirea.musin.domain.usecases;
+
+import ru.mirea.musin.domain.repository.VoiceRepository;
+
+public class RecognizeVoiceToCity {
+    private final VoiceRepository repo;
+    public RecognizeVoiceToCity(VoiceRepository repo) { this.repo = repo; }
+    public String execute(byte[] audioBytes) { return repo.recognizeCity(audioBytes); }
+}
+```
+
+### ./domain/src/main/java/ru/mirea/musin/domain/usecases/RegisterUser.java
+```java
+package ru.mirea.musin.domain.usecases;
+
+import ru.mirea.musin.domain.models.User;
+import ru.mirea.musin.domain.repository.AuthRepository;
+
+public class RegisterUser {
+    private final AuthRepository repo;
+    public RegisterUser(AuthRepository repo) { this.repo = repo; }
+
+    public User execute(String email, String password) {
+        return repo.register(email, password);
+    }
+}
+```
+
+### ./domain/src/main/java/ru/mirea/musin/domain/usecases/RemoveCityFromFavorites.java
+```java
+package ru.mirea.musin.domain.usecases;
+
+import ru.mirea.musin.domain.models.City;
+import ru.mirea.musin.domain.repository.FavoritesRepository;
+
+public class RemoveCityFromFavorites {
+    private final FavoritesRepository repo;
+    public RemoveCityFromFavorites(FavoritesRepository repo) { this.repo = repo; }
+    public boolean execute(City city) { return repo.removeCity(city); }
+}
+```
+
+### ./domain/src/main/java/ru/mirea/musin/domain/usecases/SearchCity.java
+```java
+package ru.mirea.musin.domain.usecases;
+
+import java.util.List;
+import ru.mirea.musin.domain.models.City;
+import ru.mirea.musin.domain.repository.WeatherRepository;
+
+public class SearchCity {
+    private final WeatherRepository repo;
+    public SearchCity(WeatherRepository repo) { this.repo = repo; }
+    public List<City> execute(String query) { return repo.searchCity(query); }
+}
+
+```
+
+### ./domain/src/main/java/ru/mirea/musin/domain/usecases/SyncWeatherFromApi.java
+```java
+package ru.mirea.musin.domain.usecases;
+
+import ru.mirea.musin.domain.repository.WeatherRepository;
+
+public class SyncWeatherFromApi {
+    private final WeatherRepository repo;
+    public SyncWeatherFromApi(WeatherRepository repo) { this.repo = repo; }
+    public boolean execute() { return repo.syncWeatherFromApi(); }
+}
+```
+
+## Конфигурационные файлы
+
+### ./app/src/main/AndroidManifest.xml
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.TravelWeather"
+        tools:targetApi="31">
+        <activity android:name=".presentation.LoginActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".presentation.MainActivity" android:exported="false"/>
+        <activity android:name=".presentation.WeatherActivity" />
+        <activity android:name=".presentation.RegisterActivity" />
+        <activity android:name=".presentation.ProfileActivity" />
+    </application>
+
+</manifest>
+```
+
+### ./data/src/main/AndroidManifest.xml
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+</manifest>
+```
+
+### ./gradle.properties
+```xml
+# Project-wide Gradle settings.
+# IDE (e.g. Android Studio) users:
+# Gradle settings configured through the IDE *will override*
+# any settings specified in this file.
+# For more details on how to configure your build environment visit
+# http://www.gradle.org/docs/current/userguide/build_environment.html
+# Specifies the JVM arguments used for the daemon process.
+# The setting is particularly useful for tweaking memory settings.
+org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+# When configured, Gradle will run in incubating parallel mode.
+# This option should only be used with decoupled projects. For more details, visit
+# https://developer.android.com/r/tools/gradle-multi-project-decoupled-projects
+# org.gradle.parallel=true
+# AndroidX package structure to make it clearer which packages are bundled with the
+# Android operating system, and which are packaged with your app's APK
+# https://developer.android.com/topic/libraries/support-library/androidx-rn
+android.useAndroidX=true
+# Enables namespacing of each library's R class so that its R class includes only the
+# resources declared in the library itself and none from the library's dependencies,
+# thereby reducing the size of the R class for that library
+android.nonTransitiveRClass=true
+```
+
+### ./settings.gradle.kts
+```xml
+pluginManagement {
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "TravelWeather"
+include(":app", ":domain", ":data")
+
+```
+

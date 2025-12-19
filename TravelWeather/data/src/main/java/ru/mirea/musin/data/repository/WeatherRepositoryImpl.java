@@ -1,6 +1,5 @@
 package ru.mirea.musin.data.repository;
 
-import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 import retrofit2.Response;
@@ -33,20 +32,18 @@ public class WeatherRepositoryImpl implements WeatherRepository {
             if (response.isSuccessful() && response.body() != null) {
                 WeatherResponse w = response.body();
                 String condition = w.weather.get(0).description;
-                String complexCondition = condition + "|" + w.main.humidity + "|" + w.wind.speed;
+                String iconCode = w.weather.get(0).icon; // Получаем код иконки (нап. "10d")
 
-                // --- ЛОГИКА ДЕНЬ/НОЧЬ ---
                 boolean isDay = true;
                 if (w.sys != null) {
                     long now = System.currentTimeMillis() / 1000;
-                    // Если сейчас больше рассвета И меньше заката = День
                     isDay = (now > w.sys.sunrise && now < w.sys.sunset);
                 }
 
-                return new WeatherNow(1, w.main.temp, complexCondition, isDay); // Передаем isDay
-            } else {
-                return null;
+                // Передаем iconCode
+                return new WeatherNow(1, w.main.temp, condition, isDay, iconCode);
             }
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -61,13 +58,11 @@ public class WeatherRepositoryImpl implements WeatherRepository {
             if (response.isSuccessful() && response.body() != null) {
                 List<WeatherResponse> list = response.body().list;
 
-                // ВАЖНО: Возвращаем ВСЕ элементы (каждые 3 часа)
-                // А Activity сама решит, какие показывать в "почасовом", а какие в "5 дней"
                 for (WeatherResponse item : list) {
-                    // В прогнозе есть поле sys.pod ("d" или "n")
                     boolean isDay = "d".equals(item.sys.pod);
+                    String iconCode = item.weather.get(0).icon;
 
-                    result.add(new WeatherNow((int)item.dt, item.main.temp, item.weather.get(0).description, isDay));
+                    result.add(new WeatherNow((int)item.dt, item.main.temp, item.weather.get(0).description, isDay, iconCode));
                 }
             }
         } catch (Exception e) {

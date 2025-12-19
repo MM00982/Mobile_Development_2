@@ -11,6 +11,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.squareup.picasso.Picasso;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -24,9 +26,8 @@ public class WeatherActivity extends AppCompatActivity {
 
     private Button btnAction;
     private String finalCityName;
-    private WeatherViewModel viewModel; // ViewModel
+    private WeatherViewModel viewModel;
 
-    // UI Элементы (поля класса, чтобы видеть их в Observer)
     private TextView tvTemp, tvDate;
     private ImageView ivBigSun;
     private LinearLayout forecastContainer, hourlyContainer;
@@ -40,7 +41,6 @@ public class WeatherActivity extends AppCompatActivity {
         if (cityName == null) cityName = "Москва";
         finalCityName = cityName;
 
-        // 1. Инициализация ViewModel
         viewModel = new ViewModelProvider(this, new ViewModelFactory(this)).get(WeatherViewModel.class);
 
         initViews();
@@ -54,27 +54,30 @@ public class WeatherActivity extends AppCompatActivity {
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
-        // Кнопка Избранного вызывает метод ViewModel
-        btnAction.setOnClickListener(v -> {
-            viewModel.toggleFavorite(finalCityName);
-        });
+        btnAction.setOnClickListener(v -> viewModel.toggleFavorite(finalCityName));
 
-        // 2. ПОДПИСКА НА ДАННЫЕ (LIVEDATA)
+        // --- LIVEDATA ---
 
-        // Текущая погода
         viewModel.getCurrentWeather().observe(this, weather -> {
             if (weather == null) return;
             tvTemp.setText(String.format("%.1f°", weather.getTempC()));
-            ivBigSun.setImageResource(getIconByCondition(weather.getCondition(), weather.isDay()));
+
+            // --- ЗАДАНИЕ PICASSO ---
+            // Загружаем иконку с официального сайта OpenWeather
+            String iconUrl = "https://openweathermap.org/img/wn/" + weather.getIconId() + "@4x.png";
+
+            Picasso.get()
+                    .load(iconUrl)
+                    .placeholder(R.drawable.ic_sun_login) // Пока грузится
+                    .error(R.drawable.ic_cloud)           // Если ошибка
+                    .into(ivBigSun);
         });
 
-        // Прогноз (почасовой + 5 дней)
         viewModel.getForecast().observe(this, allForecasts -> {
             fillHourlyForecast(allForecasts);
             fillDailyForecast(allForecasts);
         });
 
-        // Статус избранного (меняет цвет кнопки)
         viewModel.getIsFavorite().observe(this, isFav -> {
             if (isFav) {
                 btnAction.setText("Удалить из избранного");
@@ -85,12 +88,10 @@ public class WeatherActivity extends AppCompatActivity {
             }
         });
 
-        // Ошибки
         viewModel.getError().observe(this, errorMsg -> {
             Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
         });
 
-        // 3. Запуск загрузки
         viewModel.loadWeather(finalCityName);
     }
 
@@ -121,7 +122,10 @@ public class WeatherActivity extends AppCompatActivity {
             Date d = new Date((long)item.getCityId() * 1000);
             tvHour.setText(hourFormat.format(d));
             tvHourTemp.setText(String.format("%.0f°", item.getTempC()));
-            ivHourIcon.setImageResource(getIconByCondition(item.getCondition(), item.isDay()));
+
+            // Picasso для часового прогноза
+            String iconUrl = "https://openweathermap.org/img/wn/" + item.getIconId() + "@2x.png";
+            Picasso.get().load(iconUrl).into(ivHourIcon);
 
             hourlyContainer.addView(view);
             hourlyCount++;
@@ -153,24 +157,15 @@ public class WeatherActivity extends AppCompatActivity {
                 String cond = item.getCondition().split("\\|")[0];
                 tvDesc.setText(cond);
                 tvTempSmall.setText(String.format("%.0f°", item.getTempC()));
-                ivIcon.setImageResource(getIconByCondition(cond, true));
+
+                // Picasso для дневного прогноза
+                String iconUrl = "https://openweathermap.org/img/wn/" + item.getIconId() + "@2x.png";
+                Picasso.get().load(iconUrl).into(ivIcon);
 
                 forecastContainer.addView(view);
                 lastDay = dayStr;
                 daysCount++;
             }
         }
-    }
-
-    private int getIconByCondition(String condition, boolean isDay) {
-        String c = condition.toLowerCase();
-        if (c.contains("гроз") || c.contains("storm") || c.contains("thunder")) return R.drawable.ic_storm;
-        if (c.contains("снег") || c.contains("snow") || c.contains("sleet") || c.contains("blizzard") || c.contains("ice")) return R.drawable.ic_cloud_snow;
-        if (c.contains("дождь") || c.contains("rain") || c.contains("drizzle") || c.contains("shower")) return R.drawable.ic_rain;
-        if (c.contains("туман") || c.contains("fog") || c.contains("mist") || c.contains("haze") || c.contains("мгла")) return R.drawable.ic_fog;
-        if (c.contains("пасмурно") || c.contains("overcast")) return R.drawable.ic_cloud;
-        if (c.contains("обла") || c.contains("cloud")) return isDay ? R.drawable.ic_cloud_sun : R.drawable.ic_cloud_moon;
-        if (c.contains("ясно") || c.contains("clear")) return isDay ? R.drawable.ic_sun_yellow : R.drawable.ic_moon;
-        return isDay ? R.drawable.ic_sun_yellow : R.drawable.ic_moon;
     }
 }

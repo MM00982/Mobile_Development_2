@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,7 +22,7 @@ public class MainViewModel extends ViewModel {
     private final VoiceRepository voiceRepo;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    private final MutableLiveData<List<City>> favoritesLiveData = new MutableLiveData<>();
+    private final MutableLiveData<List<City>> contentLiveData = new MutableLiveData<>(); // Список для экрана
     private final MutableLiveData<String> voiceResultLiveData = new MutableLiveData<>();
 
     public MainViewModel(FavoritesRepository favRepo, VoiceRepository voiceRepo) {
@@ -29,25 +30,54 @@ public class MainViewModel extends ViewModel {
         this.voiceRepo = voiceRepo;
     }
 
-    public LiveData<List<City>> getFavorites() {
-        return favoritesLiveData;
+    public LiveData<List<City>> getContent() {
+        return contentLiveData;
     }
 
     public LiveData<String> getVoiceResult() {
         return voiceResultLiveData;
     }
 
-    public void loadFavorites() {
+    // Загрузка данных: Избранное + Популярное
+    public void loadContent() {
         executor.execute(() -> {
-            List<City> cities = new GetFavorites(favRepo).execute();
-            favoritesLiveData.postValue(cities);
+            // 1. Получаем избранное из БД
+            List<City> favorites = new GetFavorites(favRepo).execute();
+            // Обновляем поле country на "Сохранено", чтобы Адаптер знал, что писать
+            List<City> displayList = new ArrayList<>();
+            for (City c : favorites) {
+                displayList.add(new City(c.getId(), c.getName(), "Сохранено"));
+            }
+
+            // 2. Добавляем популярные города
+            String[] popularNames = {"Москва", "Лондон", "Токио", "Нью-Йорк", "Париж", "Дубай"};
+
+            for (String popName : popularNames) {
+                // Проверяем, нет ли уже такого города в избранном
+                boolean alreadyFav = false;
+                for (City fav : favorites) {
+                    if (fav.getName().equalsIgnoreCase(popName)) {
+                        alreadyFav = true;
+                        break;
+                    }
+                }
+
+                // Если не в избранном - добавляем как "Популярное"
+                if (!alreadyFav) {
+                    displayList.add(new City(0, popName, "Популярное"));
+                }
+            }
+
+            contentLiveData.postValue(displayList);
         });
     }
 
     public void removeCity(City city) {
         executor.execute(() -> {
+            // Удаляем только если это "Сохранено" (ID != 0 или проверка через репо)
+            // Но метод репозитория ищет по имени, так что сработает
             new RemoveCityFromFavorites(favRepo).execute(city);
-            loadFavorites();
+            loadContent(); // Перезагружаем список
         });
     }
 

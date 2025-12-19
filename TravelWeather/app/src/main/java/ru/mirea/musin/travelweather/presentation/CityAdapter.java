@@ -41,7 +41,6 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.CityViewHolder
     @NonNull
     @Override
     public CityViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Используем уже существующий у вас макет item_city_removable
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_city_removable, parent, false);
         return new CityViewHolder(view);
@@ -73,7 +72,19 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.CityViewHolder
 
         public void bind(City city) {
             tvName.setText(city.getName());
-            tvCountry.setText("Сохранено");
+
+            // Получаем статус ("Сохранено" или "Популярное") из поля country
+            String status = city.getCountry();
+            tvCountry.setText(status);
+
+            // Если это "Популярное", скрываем кнопку удаления
+            if ("Популярное".equals(status)) {
+                btnDelete.setVisibility(View.GONE);
+                tvCountry.setTextColor(0xFF2196F3); // Синий цвет для популярных
+            } else {
+                btnDelete.setVisibility(View.VISIBLE);
+                tvCountry.setTextColor(0xFF757575); // Серый для сохраненных
+            }
 
             containerInfo.setOnClickListener(v -> clickListener.onCityClick(city));
             btnDelete.setOnClickListener(v -> deleteListener.onCityDelete(city));

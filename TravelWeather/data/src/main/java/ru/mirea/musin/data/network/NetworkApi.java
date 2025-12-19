@@ -11,7 +11,7 @@ public class NetworkApi {
             e.printStackTrace();
         }
 
-        // ИСПРАВЛЕНИЕ: Добавили "1" (cityId) первым параметром
-        return new WeatherNow(1, 20.0, "Солнечно (Network Mock)");
+        // ИСПРАВЛЕНИЕ: Передаем true (день) и "01d" (иконка солнца) как заглушки
+        return new WeatherNow(1, 20.0, "Солнечно (Network Mock)", true, "01d");
     }
 }
