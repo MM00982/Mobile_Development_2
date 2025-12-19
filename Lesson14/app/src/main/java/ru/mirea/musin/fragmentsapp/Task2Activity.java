@@ -1,13 +1,12 @@
-package ru.mirea.musin.travelweather.presentation;
+package ru.mirea.musin.fragmentsapp;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
-import ru.mirea.musin.travelweather.R;
 
-public class MainActivity extends AppCompatActivity {
+public class Task2Activity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_task2);
     }
 }

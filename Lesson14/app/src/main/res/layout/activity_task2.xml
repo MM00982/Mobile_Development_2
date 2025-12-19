@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Контейнер для списка -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/list_container"
+        android:name="ru.mirea.musin.fragmentsapp.ListFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Контейнер для деталей -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/details_container"
+        android:name="ru.mirea.musin.fragmentsapp.DetailsFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#E0E0E0"/>
+</LinearLayout>
