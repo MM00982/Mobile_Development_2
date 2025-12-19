@@ -1,0 +1,8 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFD600" android:pathData="M6,19h13c2.76,0 5,-2.24 5,-5 0,-2.64 -2.05,-4.78 -4.65,-4.96C18.67,5.59 15.64,3 12,3c-3.64,0 -6.67,2.59 -7.35,6.04C2.05,9.22 0,11.36 0,14c0,2.76 2.24,5 5,5h1z"/>
+    <!-- Солнышко выглядывает -->
+    <path android:fillColor="#FFD600" android:pathData="M20,8.05c0.52,-0.17 1.01,-0.41 1.46,-0.71l1.42,1.42c-0.66,0.61 -1.41,1.09 -2.23,1.41L20,8.05zM17.66,5.83l2.11,-2.11c0.75,0.47 1.4,1.06 1.94,1.75l-1.94,1.94C19.16,6.86 18.45,6.26 17.66,5.83z"/>
+    <!-- Поверх рисуем облако -->
+    <path android:fillColor="#90A4AE" android:pathData="M19,10c-0.23,0 -0.45,0.02 -0.67,0.05C17.76,7.57 15.42,6 13,6c-2.42,0 -4.76,1.57 -5.33,4.05C4.94,10.27 2.89,12.24 2.89,15c0,2.76 2.24,5 5,5h11.11c2.76,0 5,-2.24 5,-5S21.76,10 19,10z"/>
+</vector>

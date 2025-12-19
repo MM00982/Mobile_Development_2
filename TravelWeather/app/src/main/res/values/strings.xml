@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">TravelWeather</string>
+    <string-array name="cities_array">
+        <item>Москва</item>
+        <item>Санкт-Петербург</item>
+        <item>Новосибирск</item>
+        <item>Екатеринбург</item>
+        <item>Казань</item>
+        <item>Нижний Новгород</item>
+        <item>Сочи</item>
+        <item>Лондон</item>
+        <item>Париж</item>
+        <item>Нью-Йорк</item>
+        <item>Токио</item>
+        <item>Дубай</item>
+    </string-array>
 </resources>

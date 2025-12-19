@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "748016609714",
+    "project_id": "travelweather-f9db9",
+    "storage_bucket": "travelweather-f9db9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:748016609714:android:21d91f44a4eb524e715cab",
+        "android_client_info": {
+          "package_name": "ru.mirea.musin.travelweather"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPbE5reOJUQDfsiH1s5kFV0Ue4p59ulCs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

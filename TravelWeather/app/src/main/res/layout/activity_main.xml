@@ -1,70 +1,192 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5">
 
+    <!-- Заголовок -->
+    <TextView
+        android:id="@+id/tvHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:text="Список Городов"
+        android:textColor="#212121"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <!-- Поиск -->
     <LinearLayout
-        android:orientation="vertical" android:padding="20dp"
-        android:layout_width="match_parent" android:layout_height="wrap_content">
+        android:id="@+id/searchContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="20dp"
+        app:layout_constraintTop_toBottomOf="@+id/tvHeader">
 
-        <Button
-            android:id="@+id/btnLogin"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="Вход (мок)" />
+        <AutoCompleteTextView
+            android:id="@+id/etSearch"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_input_rounded"
+            android:completionThreshold="1"
+            android:hint="Найти город..."
+            android:inputType="textCapSentences"
+            android:maxLines="1"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:drawableStart="@android:drawable/ic_menu_search"
+            android:drawablePadding="10dp"
+            android:drawableTint="#757575"
+            android:textColor="#212121"
+            android:textColorHint="#9E9E9E"
+            android:imeOptions="actionSearch"/>
 
-        <Button
-            android:id="@+id/btnCities"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="Загрузить список городов" android:layout_marginTop="12dp" />
-
-        <EditText
-            android:id="@+id/etCity"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:hint="Город (для поиска/прогноза)" android:layout_marginTop="8dp"/>
-
-        <Button
-            android:id="@+id/btnSearch"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="Поиск города" android:layout_marginTop="8dp"/>
-
-        <Button
-            android:id="@+id/btnForecast"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="Прогноз по городу" android:layout_marginTop="8dp"/>
-
-        <Button
-            android:id="@+id/btnRecognize"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="Распознать голос (мок)" android:layout_marginTop="8dp"/>
-
-        <Button
-            android:id="@+id/btnSync"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="Синхронизация из API (мок)" android:layout_marginTop="8dp"/>
-
-        <EditText
-            android:id="@+id/etFavCity"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:hint="Город (избранное)" android:layout_marginTop="16dp"/>
-
-        <Button
-            android:id="@+id/btnAddFav"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="Добавить в избранное" android:layout_marginTop="8dp"/>
-
-        <Button
-            android:id="@+id/btnRemoveFav"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="Удалить из избранного" android:layout_marginTop="8dp"/>
-
-        <Button
-            android:id="@+id/btnGetFav"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="Показать избранное" android:layout_marginTop="8dp"/>
-
-        <!-- RESULT -->
-        <TextView
-            android:id="@+id/tvResult"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="—" android:textSize="16sp" android:layout_marginTop="16dp"/>
+        <ImageButton
+            android:id="@+id/btnMic"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/bg_btn_yellow"
+            android:padding="12dp"
+            android:src="@android:drawable/ic_btn_speak_now"
+            app:tint="#212121"/>
     </LinearLayout>
-</ScrollView>
+
+    <TextView
+        android:id="@+id/tvCurrentLocLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginStart="20dp"
+        android:text="ТЕКУЩЕЕ МЕСТОПОЛОЖЕНИЕ"
+        android:textColor="#757575"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/searchContainer" />
+
+    <!-- Карточка -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cardCurrent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginHorizontal="20dp"
+        android:background="@drawable/bg_btn_yellow"
+        android:padding="20dp"
+        app:layout_constraintTop_toBottomOf="@+id/tvCurrentLocLabel">
+
+        <TextView
+            android:id="@+id/tvCityName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Москва"
+            android:textColor="#212121"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvCountry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Россия"
+            android:textColor="#212121"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvCityName" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Список -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        android:clipToPadding="false"
+        app:layout_constraintTop_toBottomOf="@+id/cardCurrent"
+        app:layout_constraintBottom_toTopOf="@+id/bottomNavigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:id="@+id/citiesContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingBottom="20dp">
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- НИЖНЯЯ ПАНЕЛЬ (Главная - ЖЕЛТАЯ) -->
+    <LinearLayout
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:background="#FFFFFF"
+        android:elevation="16dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="20dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- Кнопка ГЛАВНАЯ (АКТИВНА) -->
+        <LinearLayout
+            android:id="@+id/navHome"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_nav_selected"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_home"
+                app:tint="#212121"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Главная"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="#212121"/>
+        </LinearLayout>
+
+        <Space android:layout_width="16dp" android:layout_height="wrap_content"/>
+
+        <!-- Кнопка ПРОФИЛЬ (НЕ АКТИВНА) -->
+        <LinearLayout
+            android:id="@+id/navProfile"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_person"
+                app:tint="#757575"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Профиль"
+                android:textSize="10sp"
+                android:textColor="#757575"/>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
