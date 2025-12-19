@@ -3,31 +3,28 @@ package ru.mirea.musin.travelweather.presentation;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
-
-import java.util.List;
-
 import ru.mirea.musin.travelweather.R;
-import ru.mirea.musin.domain.models.City;
 
 public class MainActivity extends AppCompatActivity {
 
     private AutoCompleteTextView etSearch;
-    private LinearLayout citiesContainer;
+    private RecyclerView recyclerView;
+    private CityAdapter cityAdapter;
     private FirebaseAuth auth;
-    private MainViewModel viewModel; // Ссылка на ViewModel
+    private MainViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,17 +32,32 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         auth = FirebaseAuth.getInstance();
-        citiesContainer = findViewById(R.id.citiesContainer);
         etSearch = findViewById(R.id.etSearch);
         ImageButton btnMic = findViewById(R.id.btnMic);
+        recyclerView = findViewById(R.id.recyclerView);
 
-        // 1. Инициализация ViewModel через Фабрику
+        // --- ИНИЦИАЛИЗАЦИЯ RECYCLER VIEW ---
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        cityAdapter = new CityAdapter(
+                city -> openWeather(city.getName()), // Клик по городу
+                city -> viewModel.removeCity(city)   // Клик по удалению
+        );
+        recyclerView.setAdapter(cityAdapter);
+
+        // --- VIEW MODEL ---
         viewModel = new ViewModelProvider(this, new ViewModelFactory(this)).get(MainViewModel.class);
 
-        // 2. Подписка на данные (LiveData)
+        // Подписываемся на LiveData и обновляем Адаптер
         viewModel.getFavorites().observe(this, favoritesList -> {
-            // Как только данные изменятся, этот код выполнится сам
-            refreshUI(favoritesList);
+            cityAdapter.setItems(favoritesList);
+
+            // Если список пуст, можно скрыть заголовок (по желанию)
+            View tvSaved = findViewById(R.id.tvSavedLabel);
+            if(favoritesList == null || favoritesList.isEmpty()) {
+                tvSaved.setVisibility(View.GONE);
+            } else {
+                tvSaved.setVisibility(View.VISIBLE);
+            }
         });
 
         viewModel.getVoiceResult().observe(this, recognizedCity -> {
@@ -53,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
             openWeather(recognizedCity);
         });
 
-        // --- UI Логика ---
+        // --- ОСТАЛЬНАЯ ЛОГИКА (Навигация, Поиск и т.д.) ---
         View navHome = findViewById(R.id.navHome);
         View navProfile = findViewById(R.id.navProfile);
 
@@ -104,7 +116,6 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             Toast.makeText(this, "Слушаю...", Toast.LENGTH_SHORT).show();
-            // Вызов метода ViewModel
             viewModel.recognizeSpeech();
         });
     }
@@ -113,65 +124,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         viewModel.loadFavorites();
-    }
-
-    private void refreshUI(List<City> favorites) {
-        citiesContainer.removeAllViews();
-        LayoutInflater inflater = LayoutInflater.from(this);
-
-        if (favorites != null && !favorites.isEmpty()) {
-            addHeader(inflater, "СОХРАНЕННЫЕ");
-            for (City city : favorites) {
-                View itemView = inflater.inflate(R.layout.item_city_removable, citiesContainer, false);
-                TextView tvName = itemView.findViewById(R.id.tvCityNameItem);
-                TextView tvCountry = itemView.findViewById(R.id.tvCountryItem);
-                View btnDelete = itemView.findViewById(R.id.btnDelete);
-                View containerInfo = itemView.findViewById(R.id.containerInfo);
-
-                tvName.setText(city.getName());
-                tvCountry.setText("Сохранено");
-
-                containerInfo.setOnClickListener(v -> openWeather(city.getName()));
-
-                // Удаление через ViewModel
-                btnDelete.setOnClickListener(v -> {
-                    viewModel.removeCity(city);
-                });
-
-                citiesContainer.addView(itemView);
-            }
-        }
-
-        addHeader(inflater, "ПОПУЛЯРНЫЕ ГОРОДА");
-        String[] popularCities = {"Москва", "Лондон", "Токио", "Нью-Йорк", "Париж"};
-
-        for (String popCity : popularCities) {
-            boolean isAlreadyFav = false;
-            if (favorites != null) {
-                for (City c : favorites) if (c.getName().equalsIgnoreCase(popCity)) isAlreadyFav = true;
-            }
-            if (isAlreadyFav) continue;
-
-            View itemView = inflater.inflate(R.layout.item_city_card, citiesContainer, false);
-            TextView tvName = itemView.findViewById(R.id.tvCityNameItem);
-            TextView tvCountry = itemView.findViewById(R.id.tvCountryItem);
-
-            tvName.setText(popCity);
-            tvCountry.setText("Популярное");
-
-            itemView.setOnClickListener(v -> openWeather(popCity));
-            citiesContainer.addView(itemView);
-        }
-    }
-
-    private void addHeader(LayoutInflater inflater, String text) {
-        TextView header = new TextView(this);
-        header.setText(text);
-        header.setTextSize(12);
-        header.setTextColor(0xFF757575);
-        header.setTypeface(null, android.graphics.Typeface.BOLD);
-        header.setPadding(0, 30, 0, 15);
-        citiesContainer.addView(header);
     }
 
     private void openWeather(String cityName) {
