@@ -13,28 +13,21 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.room.Room;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.List;
 
-import ru.mirea.musin.data.database.AppDatabase;
-import ru.mirea.musin.data.repository.FavoritesRepositoryImpl;
-import ru.mirea.musin.data.repository.VoiceRepositoryImpl;
 import ru.mirea.musin.travelweather.R;
 import ru.mirea.musin.domain.models.City;
-import ru.mirea.musin.domain.usecases.GetFavorites;
-import ru.mirea.musin.domain.usecases.RecognizeVoiceToCity;
-import ru.mirea.musin.domain.usecases.RemoveCityFromFavorites;
 
 public class MainActivity extends AppCompatActivity {
 
     private AutoCompleteTextView etSearch;
     private LinearLayout citiesContainer;
-    private AppDatabase db;
-    private FavoritesRepositoryImpl favRepo;
     private FirebaseAuth auth;
+    private MainViewModel viewModel; // Ссылка на ViewModel
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,27 +35,29 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         auth = FirebaseAuth.getInstance();
-
-        db = Room.databaseBuilder(getApplicationContext(),
-                        AppDatabase.class, "weather-db")
-                .allowMainThreadQueries()
-                .fallbackToDestructiveMigration()
-                .build();
-
-        favRepo = new FavoritesRepositoryImpl(db);
-
         citiesContainer = findViewById(R.id.citiesContainer);
         etSearch = findViewById(R.id.etSearch);
         ImageButton btnMic = findViewById(R.id.btnMic);
 
-        // --- НОВАЯ НИЖНЯЯ ПАНЕЛЬ ---
-        // НИЖНЯЯ ПАНЕЛЬ
+        // 1. Инициализация ViewModel через Фабрику
+        viewModel = new ViewModelProvider(this, new ViewModelFactory(this)).get(MainViewModel.class);
+
+        // 2. Подписка на данные (LiveData)
+        viewModel.getFavorites().observe(this, favoritesList -> {
+            // Как только данные изменятся, этот код выполнится сам
+            refreshUI(favoritesList);
+        });
+
+        viewModel.getVoiceResult().observe(this, recognizedCity -> {
+            Toast.makeText(this, "Распознано: " + recognizedCity, Toast.LENGTH_SHORT).show();
+            openWeather(recognizedCity);
+        });
+
+        // --- UI Логика ---
         View navHome = findViewById(R.id.navHome);
         View navProfile = findViewById(R.id.navProfile);
 
-        navHome.setOnClickListener(v -> {
-            // Мы уже тут, ничего не делаем
-        });
+        navHome.setOnClickListener(v -> {});
 
         navProfile.setOnClickListener(v -> {
             Intent intent;
@@ -72,10 +67,9 @@ public class MainActivity extends AppCompatActivity {
                 intent = new Intent(this, LoginActivity.class);
             }
             startActivity(intent);
-            overridePendingTransition(0, 0); // <--- ВАЖНО
+            overridePendingTransition(0, 0);
         });
 
-        // --- ЛОГИКА КАРТОЧКИ ТЕКУЩЕГО ГОРОДА ---
         View cardCurrent = findViewById(R.id.cardCurrent);
         TextView tvCityName = findViewById(R.id.tvCityName);
 
@@ -84,7 +78,6 @@ public class MainActivity extends AppCompatActivity {
             openWeather(city);
         });
 
-        // --- ЛОГИКА ПОИСКА ---
         String[] cities = getResources().getStringArray(R.array.cities_array);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_dropdown_item_1line, cities);
@@ -105,40 +98,28 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
 
-        // --- ЛОГИКА МИКРОФОНА ---
         btnMic.setOnClickListener(v -> {
             if (auth.getCurrentUser() == null) {
                 Toast.makeText(this, "Доступно только авторизованным пользователям", Toast.LENGTH_SHORT).show();
                 return;
             }
-
             Toast.makeText(this, "Слушаю...", Toast.LENGTH_SHORT).show();
-            new Thread(() -> {
-                VoiceRepositoryImpl voiceRepo = new VoiceRepositoryImpl();
-                RecognizeVoiceToCity useCase = new RecognizeVoiceToCity(voiceRepo);
-                String recognizedCity = useCase.execute(new byte[0]);
-
-                runOnUiThread(() -> {
-                    Toast.makeText(this, "Распознано: " + recognizedCity, Toast.LENGTH_SHORT).show();
-                    openWeather(recognizedCity);
-                });
-            }).start();
+            // Вызов метода ViewModel
+            viewModel.recognizeSpeech();
         });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        refreshLists();
+        viewModel.loadFavorites();
     }
 
-    private void refreshLists() {
+    private void refreshUI(List<City> favorites) {
         citiesContainer.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(this);
 
-        List<City> favorites = new GetFavorites(favRepo).execute();
-
-        if (!favorites.isEmpty()) {
+        if (favorites != null && !favorites.isEmpty()) {
             addHeader(inflater, "СОХРАНЕННЫЕ");
             for (City city : favorites) {
                 View itemView = inflater.inflate(R.layout.item_city_removable, citiesContainer, false);
@@ -152,9 +133,9 @@ public class MainActivity extends AppCompatActivity {
 
                 containerInfo.setOnClickListener(v -> openWeather(city.getName()));
 
+                // Удаление через ViewModel
                 btnDelete.setOnClickListener(v -> {
-                    new RemoveCityFromFavorites(favRepo).execute(city);
-                    refreshLists();
+                    viewModel.removeCity(city);
                 });
 
                 citiesContainer.addView(itemView);
@@ -166,7 +147,9 @@ public class MainActivity extends AppCompatActivity {
 
         for (String popCity : popularCities) {
             boolean isAlreadyFav = false;
-            for (City c : favorites) if (c.getName().equalsIgnoreCase(popCity)) isAlreadyFav = true;
+            if (favorites != null) {
+                for (City c : favorites) if (c.getName().equalsIgnoreCase(popCity)) isAlreadyFav = true;
+            }
             if (isAlreadyFav) continue;
 
             View itemView = inflater.inflate(R.layout.item_city_card, citiesContainer, false);
