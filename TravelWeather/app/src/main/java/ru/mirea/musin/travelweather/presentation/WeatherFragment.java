@@ -9,20 +9,17 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-
+import androidx.navigation.Navigation; // Важный импорт
 import com.squareup.picasso.Picasso;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
-
 import ru.mirea.musin.travelweather.R;
 import ru.mirea.musin.domain.models.WeatherNow;
 
@@ -31,7 +28,6 @@ public class WeatherFragment extends Fragment {
     private WeatherViewModel viewModel;
     private String cityName = "Москва";
 
-    // UI элементы
     private TextView tvTemp;
     private ImageView ivBigSun;
     private LinearLayout forecastContainer, hourlyContainer;
@@ -46,7 +42,6 @@ public class WeatherFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Получаем аргументы (название города)
         if (getArguments() != null) {
             cityName = getArguments().getString("CITY_NAME", "Москва");
         }
@@ -63,18 +58,17 @@ public class WeatherFragment extends Fragment {
         sdf.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
         tvDate.setText("Сегодня, " + sdf.format(new Date()));
 
-        // Кнопка Назад - просто удаляем фрагмент из стека
-        view.findViewById(R.id.btnBack).setOnClickListener(v -> getParentFragmentManager().popBackStack());
+        // Кнопка Назад - навигация
+        view.findViewById(R.id.btnBack).setOnClickListener(v ->
+                Navigation.findNavController(view).popBackStack()
+        );
 
         Button btnAction = view.findViewById(R.id.btnMap);
         btnAction.setOnClickListener(v -> viewModel.toggleFavorite(cityName));
 
-        // --- ПОДПИСКИ ---
         viewModel.getCurrentWeather().observe(getViewLifecycleOwner(), weather -> {
             if (weather == null) return;
             tvTemp.setText(String.format("%.1f°", weather.getTempC()));
-
-            // Picasso
             String iconUrl = "https://openweathermap.org/img/wn/" + weather.getIconId() + "@4x.png";
             Picasso.get().load(iconUrl).placeholder(R.drawable.ic_sun_login).into(ivBigSun);
         });
@@ -107,8 +101,6 @@ public class WeatherFragment extends Fragment {
 
     private void fillForecasts(List<WeatherNow> allForecasts) {
         if (getContext() == null) return;
-
-        // Почасовой
         hourlyContainer.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(getContext());
         SimpleDateFormat hourFormat = new SimpleDateFormat("HH:mm");
@@ -118,18 +110,14 @@ public class WeatherFragment extends Fragment {
         for(WeatherNow item : allForecasts) {
             if (hourlyCount >= 6) break;
             View v = inflater.inflate(R.layout.item_hourly, hourlyContainer, false);
-
             ((TextView)v.findViewById(R.id.tvHour)).setText(hourFormat.format(new Date((long)item.getCityId()*1000)));
             ((TextView)v.findViewById(R.id.tvHourTemp)).setText(String.format("%.0f°", item.getTempC()));
-
             ImageView iv = v.findViewById(R.id.ivHourIcon);
             Picasso.get().load("https://openweathermap.org/img/wn/" + item.getIconId() + "@2x.png").into(iv);
-
             hourlyContainer.addView(v);
             hourlyCount++;
         }
 
-        // По дням
         forecastContainer.removeAllViews();
         SimpleDateFormat dayFormat = new SimpleDateFormat("EE", new Locale("ru"));
         String lastDay = "";
@@ -138,18 +126,14 @@ public class WeatherFragment extends Fragment {
         for (WeatherNow item : allForecasts) {
             Date d = new Date((long)item.getCityId() * 1000);
             String dayStr = dayFormat.format(d).toUpperCase();
-
             if (!dayStr.equals(lastDay)) {
                 if (daysCount >= 5) break;
                 View v = inflater.inflate(R.layout.item_forecast_row, forecastContainer, false);
-
                 ((TextView)v.findViewById(R.id.tvDay)).setText(dayStr);
                 ((TextView)v.findViewById(R.id.tvDesc)).setText(item.getCondition());
                 ((TextView)v.findViewById(R.id.tvTempSmall)).setText(String.format("%.0f°", item.getTempC()));
-
                 ImageView iv = v.findViewById(R.id.ivForecastIcon);
                 Picasso.get().load("https://openweathermap.org/img/wn/" + item.getIconId() + "@2x.png").into(iv);
-
                 forecastContainer.addView(v);
                 lastDay = dayStr;
                 daysCount++;

@@ -1,6 +1,5 @@
 package ru.mirea.musin.travelweather.presentation;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,11 +8,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
+import androidx.navigation.Navigation;
 import com.google.firebase.auth.FirebaseAuth;
 import ru.mirea.musin.travelweather.R;
 
@@ -32,21 +30,27 @@ public class LoginFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         auth = FirebaseAuth.getInstance();
 
+        // Авто-вход
+        if (auth.getCurrentUser() != null) {
+            Navigation.findNavController(view).navigate(R.id.action_login_to_home);
+            return;
+        }
+
         EditText etEmail = view.findViewById(R.id.etEmail);
         EditText etPass = view.findViewById(R.id.etPass);
         Button btnLogin = view.findViewById(R.id.btnLogin);
         TextView tvRegister = view.findViewById(R.id.tvRegisterLabel);
 
-        // Навигация нижней панели (возврат на главную)
-        view.findViewById(R.id.navHome).setOnClickListener(v -> {
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new HomeFragment())
-                    .commit();
-        });
+        // Кнопка Гость (если есть в разметке, иначе удали этот блок)
+        View btnGuest = view.findViewById(R.id.btnGuest);
+        if (btnGuest != null) {
+            btnGuest.setOnClickListener(v ->
+                    Navigation.findNavController(view).navigate(R.id.action_login_to_home)
+            );
+        }
 
-        // Переход на регистрацию (Activity оставим пока Activity, или тоже переделайте во фрагмент)
         tvRegister.setOnClickListener(v -> {
-            startActivity(new Intent(getActivity(), RegisterActivity.class));
+            Navigation.findNavController(view).navigate(R.id.action_login_to_register);
         });
 
         btnLogin.setOnClickListener(v -> {
@@ -61,21 +65,12 @@ public class LoginFragment extends Fragment {
             auth.signInWithEmailAndPassword(email, pass)
                     .addOnCompleteListener(requireActivity(), task -> {
                         if (task.isSuccessful()) {
-                            // Успешный вход -> идем на главную
-                            getParentFragmentManager().beginTransaction()
-                                    .replace(R.id.fragment_container, new HomeFragment())
-                                    .commit();
+                            Navigation.findNavController(view).navigate(R.id.action_login_to_home);
                         } else {
                             String msg = task.getException() != null ? task.getException().getMessage() : "Ошибка";
                             Toast.makeText(getContext(), "Ошибка: " + msg, Toast.LENGTH_SHORT).show();
                         }
                     });
         });
-
-        // Кнопка назад (стрелка)
-        View btnBack = view.findViewById(R.id.btnBack);
-        if(btnBack != null) {
-            btnBack.setOnClickListener(v -> getParentFragmentManager().popBackStack());
-        }
     }
 }

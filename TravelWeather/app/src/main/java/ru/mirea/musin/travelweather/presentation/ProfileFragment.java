@@ -6,14 +6,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
+import androidx.navigation.Navigation;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
 import ru.mirea.musin.travelweather.R;
 
 public class ProfileFragment extends Fragment {
@@ -31,22 +29,12 @@ public class ProfileFragment extends Fragment {
         TextView tvEmail = view.findViewById(R.id.tvProfileEmail);
         Button btnLogout = view.findViewById(R.id.btnLogout);
 
-        // Навигация
-        view.findViewById(R.id.navHome).setOnClickListener(v -> {
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new HomeFragment())
-                    .commit();
-        });
-
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         tvEmail.setText(user != null ? user.getEmail() : "Гость");
 
         btnLogout.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
-            // После выхода идем на логин
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new LoginFragment())
-                    .commit(); // Заменяем экран
+            Navigation.findNavController(view).navigate(R.id.action_profile_to_login);
         });
     }
 }

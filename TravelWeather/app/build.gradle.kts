@@ -48,7 +48,10 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-
-    // ДОБАВЛЕНО: Picasso для загрузки картинок
     implementation("com.squareup.picasso:picasso:2.8")
+
+    // --- NAVIGATION COMPONENT ---
+    val nav_version = "2.8.5"
+    implementation("androidx.navigation:navigation-fragment:$nav_version")
+    implementation("androidx.navigation:navigation-ui:$nav_version")
 }

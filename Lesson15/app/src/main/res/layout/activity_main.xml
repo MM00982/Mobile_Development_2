@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <Button
+        android:id="@+id/btnFragmentManager"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="1. Fragment Manager (Manual)" />
+
+    <Button
+        android:id="@+id/btnBottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="2. Bottom Navigation" />
+
+    <Button
+        android:id="@+id/btnDrawer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="3. Navigation Drawer" />
+
+</LinearLayout>

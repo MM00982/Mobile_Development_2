@@ -14,11 +14,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
-
 import ru.mirea.musin.travelweather.R;
 
 public class HomeFragment extends Fragment {
@@ -30,27 +30,20 @@ public class HomeFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Подключаем наш XML файл
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         auth = FirebaseAuth.getInstance();
-
-        // Инициализация ViewModel (context берем через requireContext())
         viewModel = new ViewModelProvider(this, new ViewModelFactory(requireContext())).get(MainViewModel.class);
 
         setupRecyclerView(view);
         setupSearch(view);
-        setupBottomNav(view); // Нижняя панель
 
-        // Подписка на данные
         viewModel.getContent().observe(getViewLifecycleOwner(), list -> {
             cityAdapter.setItems(list);
-            // Показать/скрыть заголовок, если список пуст
             View tvSaved = view.findViewById(R.id.tvSavedLabel);
             if (tvSaved != null) {
                 tvSaved.setVisibility((list == null || list.isEmpty()) ? View.GONE : View.VISIBLE);
@@ -59,7 +52,7 @@ public class HomeFragment extends Fragment {
 
         viewModel.getVoiceResult().observe(getViewLifecycleOwner(), city -> {
             Toast.makeText(getContext(), "Распознано: " + city, Toast.LENGTH_SHORT).show();
-            openWeather(city);
+            openWeather(view, city);
         });
 
         view.findViewById(R.id.btnMic).setOnClickListener(v -> {
@@ -71,7 +64,7 @@ public class HomeFragment extends Fragment {
             viewModel.recognizeSpeech();
         });
 
-        view.findViewById(R.id.cardCurrent).setOnClickListener(v -> openWeather("Москва"));
+        view.findViewById(R.id.cardCurrent).setOnClickListener(v -> openWeather(view, "Москва"));
     }
 
     @Override
@@ -84,7 +77,7 @@ public class HomeFragment extends Fragment {
         RecyclerView rv = view.findViewById(R.id.recyclerView);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
         cityAdapter = new CityAdapter(
-                city -> openWeather(city.getName()),
+                city -> openWeather(view, city.getName()),
                 city -> viewModel.removeCity(city)
         );
         rv.setAdapter(cityAdapter);
@@ -99,50 +92,23 @@ public class HomeFragment extends Fragment {
 
         etSearch.setOnItemClickListener((parent, v, position, id) -> {
             String city = (String) parent.getItemAtPosition(position);
-            openWeather(city);
+            openWeather(view, city);
         });
 
         etSearch.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH ||
                     (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)) {
                 String query = etSearch.getText().toString().trim();
-                if (!query.isEmpty()) openWeather(query);
+                if (!query.isEmpty()) openWeather(view, query);
                 return true;
             }
             return false;
         });
     }
 
-    private void setupBottomNav(View view) {
-        // Кнопка "Главная" ничего не делает, мы уже тут
-
-        // Кнопка "Профиль"
-        view.findViewById(R.id.navProfile).setOnClickListener(v -> {
-            Fragment nextFragment;
-            if (auth.getCurrentUser() != null) {
-                nextFragment = new ProfileFragment();
-            } else {
-                nextFragment = new LoginFragment();
-            }
-
-            // Навигация
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, nextFragment)
-                    .addToBackStack(null) // Чтобы можно было вернуться назад
-                    .commit();
-        });
-    }
-
-    private void openWeather(String cityName) {
-        // Переход на WeatherFragment с передачей аргумента
-        WeatherFragment fragment = new WeatherFragment();
+    private void openWeather(View view, String cityName) {
         Bundle args = new Bundle();
         args.putString("CITY_NAME", cityName);
-        fragment.setArguments(args);
-
-        getParentFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, fragment)
-                .addToBackStack(null) // Добавляем в стек
-                .commit();
+        Navigation.findNavController(view).navigate(R.id.action_home_to_weather, args);
     }
 }
